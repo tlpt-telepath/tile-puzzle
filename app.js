@@ -105,12 +105,27 @@ function randomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-function isMobileLayout() {
-  return window.matchMedia("(max-width: 768px)").matches;
+function isMobileDevice() {
+  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
+    return navigator.userAgentData.mobile;
+  }
+
+  const ua = navigator.userAgent || "";
+  if (
+    /iPhone|iPod|Android.*Mobile|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
+      ua
+    )
+  ) {
+    return true;
+  }
+
+  const hasTouch = navigator.maxTouchPoints > 1;
+  const shortEdge = Math.min(window.screen.width || 0, window.screen.height || 0);
+  return hasTouch && shortEdge > 0 && shortEdge <= 600;
 }
 
 function updateBoardDimensions() {
-  if (isMobileLayout()) {
+  if (isMobileDevice()) {
     state.cols = MOBILE_COLS;
     state.rows = MOBILE_ROWS;
     return;
