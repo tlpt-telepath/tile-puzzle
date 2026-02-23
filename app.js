@@ -13,6 +13,7 @@ const state = {
   score: 0,
   timeLeft: START_TIME,
   mode: "timed",
+  timerStarted: false,
   timerId: null,
   ended: false,
 };
@@ -22,6 +23,7 @@ const scoreEl = document.getElementById("score");
 const timeEl = document.getElementById("time");
 const remainingEl = document.getElementById("remaining");
 const modeEl = document.getElementById("mode");
+const boardShapeEl = document.getElementById("board-shape");
 const restartEl = document.getElementById("restart");
 const messageEl = document.getElementById("message");
 
@@ -105,27 +107,8 @@ function randomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
-function isMobileDevice() {
-  if (navigator.userAgentData && typeof navigator.userAgentData.mobile === "boolean") {
-    return navigator.userAgentData.mobile;
-  }
-
-  const ua = navigator.userAgent || "";
-  if (
-    /iPhone|iPod|Android.*Mobile|Windows Phone|webOS|BlackBerry|IEMobile|Opera Mini/i.test(
-      ua
-    )
-  ) {
-    return true;
-  }
-
-  const hasTouch = navigator.maxTouchPoints > 1;
-  const shortEdge = Math.min(window.screen.width || 0, window.screen.height || 0);
-  return hasTouch && shortEdge > 0 && shortEdge <= 600;
-}
-
 function updateBoardDimensions() {
-  if (isMobileDevice()) {
+  if (boardShapeEl.value === "portrait") {
     state.cols = MOBILE_COLS;
     state.rows = MOBILE_ROWS;
     return;
@@ -146,11 +129,16 @@ function initBoard() {
 }
 
 function startTimer() {
-  stopTimer();
   if (state.mode !== "timed") {
     timeEl.textContent = "∞";
     return;
   }
+  if (state.timerStarted) {
+    return;
+  }
+
+  state.timerStarted = true;
+  stopTimer();
 
   state.timerId = setInterval(() => {
     if (state.ended) {
@@ -249,13 +237,18 @@ function handleTap(x, y) {
   const removable = pickRemovableTiles(x, y);
   if (removable.length === 0) {
     playMissSound();
-    if (state.mode === "timed") {
+    if (state.mode === "timed" && state.timerStarted) {
       state.timeLeft = Math.max(0, state.timeLeft - PENALTY_SECONDS);
       if (state.timeLeft === 0) {
         endGame("時間切れです");
       }
     }
-    setMessage("消せる組み合わせがありません（タイムアタック時は-10秒）", "warn");
+    setMessage(
+      state.mode === "timed" && !state.timerStarted
+        ? "消せる組み合わせがありません（最初の消去成功でタイム開始）"
+        : "消せる組み合わせがありません（タイムアタック時は-10秒）",
+      "warn"
+    );
     renderStats();
     return;
   }
@@ -265,6 +258,9 @@ function handleTap(x, y) {
   }
   state.score += removable.length;
   playSuccessSound(removable.length);
+  if (state.mode === "timed" && !state.timerStarted) {
+    startTimer();
+  }
   setMessage(`${removable.length} タイル獲得`, "ok");
 
   renderBoard();
@@ -320,15 +316,22 @@ function resetGame() {
   state.score = 0;
   state.timeLeft = START_TIME;
   state.mode = modeEl.value;
+  state.timerStarted = false;
   state.ended = false;
+  stopTimer();
   initBoard();
   renderBoard();
   renderStats();
-  setMessage("");
-  startTimer();
+  setMessage(
+    state.mode === "timed" ? "最初にタイルを消すとカウントダウン開始" : "",
+    state.mode === "timed" ? "ok" : ""
+  );
 }
 
 restartEl.addEventListener("click", resetGame);
 modeEl.addEventListener("change", resetGame);
+boardShapeEl.addEventListener("change", resetGame);
+
+boardShapeEl.value = "portrait";
 
 resetGame();

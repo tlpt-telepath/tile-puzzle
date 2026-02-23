@@ -3,14 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <title>tile-pazzle</title>
+    <title>tile-puzzle</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <main class="app">
       <header class="topbar">
-        <h1>tile-pazzle</h1>
-        <p>PCは25x15、スマホは15x25。空マスをタップして、上下左右の最寄り同色タイルを消そう</p>
+        <h1>tile-puzzle</h1>
+        <p>空マスをタップして、上下左右の最寄り同色タイルを消そう</p>
       </header>
 
       <section class="panel" aria-label="ゲーム設定と状態">
@@ -19,6 +19,13 @@
           <select id="mode">
             <option value="timed">タイムアタック（120秒）</option>
             <option value="infinite">時間無制限</option>
+          </select>
+        </label>
+        <label class="mode-select">
+          <span>盤面向き</span>
+          <select id="board-shape">
+            <option value="portrait">縦長（15x25）</option>
+            <option value="landscape">横長（25x15）</option>
           </select>
         </label>
 
@@ -51,7 +58,7 @@
           <li>空マスのみタップ可能です。</li>
           <li>タップ地点から上下左右で最も近いタイルを見て、同じ色が2つ以上あればその色のタイルを消します。</li>
           <li>1タイル = 1点です。</li>
-          <li>タイムアタックでは、消せない空マスをタップすると残り時間が10秒減ります。</li>
+          <li>タイムアタックは最初にタイルを消した瞬間から開始し、その後はミスで残り時間が10秒減ります。</li>
           <li>効果音SE: 消去成功・失敗・ゲーム終了。</li>
         </ul>
       </section>
