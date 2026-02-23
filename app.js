@@ -1,11 +1,15 @@
-const BOARD_COLS = 25;
-const BOARD_ROWS = 15;
+const DESKTOP_COLS = 25;
+const DESKTOP_ROWS = 15;
+const MOBILE_COLS = 15;
+const MOBILE_ROWS = 25;
 const COLORS = ["#f44336", "#2196f3", "#ffeb3b", "#4caf50", "#9c27b0"];
 const START_TIME = 120;
 const PENALTY_SECONDS = 10;
 
 const state = {
   board: [],
+  cols: DESKTOP_COLS,
+  rows: DESKTOP_ROWS,
   score: 0,
   timeLeft: START_TIME,
   mode: "timed",
@@ -101,13 +105,27 @@ function randomColor() {
   return COLORS[Math.floor(Math.random() * COLORS.length)];
 }
 
+function isMobileLayout() {
+  return window.matchMedia("(max-width: 768px)").matches;
+}
+
+function updateBoardDimensions() {
+  if (isMobileLayout()) {
+    state.cols = MOBILE_COLS;
+    state.rows = MOBILE_ROWS;
+    return;
+  }
+  state.cols = DESKTOP_COLS;
+  state.rows = DESKTOP_ROWS;
+}
+
 function initBoard() {
   do {
-    state.board = Array.from({ length: BOARD_ROWS }, () =>
-      Array.from({ length: BOARD_COLS }, randomColor)
+    state.board = Array.from({ length: state.rows }, () =>
+      Array.from({ length: state.cols }, randomColor)
     );
-    const centerX = Math.floor(BOARD_COLS / 2);
-    const centerY = Math.floor(BOARD_ROWS / 2);
+    const centerX = Math.floor(state.cols / 2);
+    const centerY = Math.floor(state.rows / 2);
     state.board[centerY][centerX] = null;
   } while (!hasAnyPlayableMove());
 }
@@ -147,8 +165,8 @@ function renderStats() {
 
 function countRemainingTiles() {
   let count = 0;
-  for (let y = 0; y < BOARD_ROWS; y += 1) {
-    for (let x = 0; x < BOARD_COLS; x += 1) {
+  for (let y = 0; y < state.rows; y += 1) {
+    for (let x = 0; x < state.cols; x += 1) {
       if (state.board[y][x]) {
         count += 1;
       }
@@ -165,7 +183,7 @@ function setMessage(text, kind = "") {
 function scanNearestTile(x, y, dx, dy) {
   let cx = x + dx;
   let cy = y + dy;
-  while (cx >= 0 && cx < BOARD_COLS && cy >= 0 && cy < BOARD_ROWS) {
+  while (cx >= 0 && cx < state.cols && cy >= 0 && cy < state.rows) {
     const color = state.board[cy][cx];
     if (color) {
       return { x: cx, y: cy, color };
@@ -193,8 +211,8 @@ function pickRemovableTiles(x, y) {
 }
 
 function hasAnyPlayableMove() {
-  for (let y = 0; y < BOARD_ROWS; y += 1) {
-    for (let x = 0; x < BOARD_COLS; x += 1) {
+  for (let y = 0; y < state.rows; y += 1) {
+    for (let x = 0; x < state.cols; x += 1) {
       if (state.board[y][x] === null && pickRemovableTiles(x, y).length > 0) {
         return true;
       }
@@ -249,11 +267,11 @@ function handleTap(x, y) {
 }
 
 function renderBoard() {
-  boardEl.style.setProperty("--cols", String(BOARD_COLS));
+  boardEl.style.setProperty("--cols", String(state.cols));
   boardEl.innerHTML = "";
 
-  for (let y = 0; y < BOARD_ROWS; y += 1) {
-    for (let x = 0; x < BOARD_COLS; x += 1) {
+  for (let y = 0; y < state.rows; y += 1) {
+    for (let x = 0; x < state.cols; x += 1) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "cell";
@@ -283,6 +301,7 @@ function endGame(reason) {
 
 function resetGame() {
   ensureAudioContext();
+  updateBoardDimensions();
   state.score = 0;
   state.timeLeft = START_TIME;
   state.mode = modeEl.value;
