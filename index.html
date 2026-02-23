@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>tile-pazzle</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="topbar">
+        <h1>tile-pazzle</h1>
+        <p>25x15マス。空マスをタップして、上下左右の最寄り同色タイルを消そう</p>
+      </header>
+
+      <section class="panel" aria-label="ゲーム設定と状態">
+        <label class="mode-select">
+          <span>モード</span>
+          <select id="mode">
+            <option value="timed">タイムアタック（120秒）</option>
+            <option value="infinite">時間無制限</option>
+          </select>
+        </label>
+
+        <div class="stats">
+          <div>
+            <span class="label">スコア</span>
+            <strong id="score">0</strong>
+          </div>
+          <div>
+            <span class="label">残り時間</span>
+            <strong id="time">120</strong>
+          </div>
+          <div>
+            <span class="label">残タイル</span>
+            <strong id="remaining">0</strong>
+          </div>
+        </div>
+
+        <button id="restart" type="button">リスタート</button>
+      </section>
+
+      <section class="game-wrap">
+        <div id="message" role="status" aria-live="polite"></div>
+        <div id="board" class="board" aria-label="ゲーム盤面"></div>
+      </section>
+
+      <section class="rule-note">
+        <h2>ルール</h2>
+        <ul>
+          <li>空マスのみタップ可能です。</li>
+          <li>タップ地点から上下左右で最も近いタイルを見て、同じ色が2つ以上あればその色のタイルを消します。</li>
+          <li>1タイル = 1点です。</li>
+          <li>タイムアタックでは、消せない空マスをタップすると残り時間が10秒減ります。</li>
+          <li>効果音SE: 消去成功・失敗・ゲーム終了。</li>
+        </ul>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
